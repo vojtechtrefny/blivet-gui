@@ -157,7 +157,7 @@ class SizeChooserArea(object):
 
         self.widgets.extend([self.frame, self.frame_grid])
 
-        self.scale, self.spin_size = self.add_size_widgets()
+        self.scale, self.spin_size, self.unit_chooser = self.add_size_widgets()
 
     def add_size_widgets(self, unit="MiB"):
 
@@ -227,7 +227,7 @@ class SizeChooserArea(object):
 
         self.widgets.extend([scale, label_size, spin_size, unit_chooser])
 
-        return scale, spin_size
+        return scale, spin_size, unit_chooser
 
     def add_unit_chooser(self, default_unit):
 
@@ -268,8 +268,10 @@ class SizeChooserArea(object):
         self.scale.set_value(selected_size.convertTo(size.parseUnits(unit, False)))
 
     def set_selected_size(self, selected_size):
-
         self.scale.set_value(selected_size.convertTo(size.parseUnits(self.selected_unit, False)))
+
+    def get_selected_size(self):
+        return size.Size(str(self.scale.get_value()) + " " + self.selected_unit)
 
     def on_unit_combo_changed(self, combo):
 
