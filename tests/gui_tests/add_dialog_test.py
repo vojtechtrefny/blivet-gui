@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/python3
 
 import unittest
 
 from unittest.mock import Mock
 
-from blivetgui.dialogs.add_dialog import SizeChooserArea, SUPPORTED_UNITS
+from blivetgui.dialogs.add_dialog import SizeChooserArea, AdvancedOptions, SUPPORTED_UNITS
 
 from blivet.size import Size
 
@@ -64,6 +65,95 @@ class SizeChooserAreaTest(unittest.TestCase):
         self.size_area.set_sensitive(True)
         for widget in self.size_area.widgets:
             self.assertTrue(widget.get_sensitive())
+
+class AdvancedOptionsTest(unittest.TestCase):
+
+    add_dialog = Mock(show_widgets=Mock(return_value=True), hide_widgets=Mock(return_value=True))
+    def test_lvm_options(self):
+        # test lvm options are displayed for lvm/lvmvg type
+        parent_device = Mock(format=Mock(labelType="gpt"))
+        free_device = Mock(isLogical=False)
+
+        advanced_options = AdvancedOptions(add_dialog=self.add_dialog, device_type="lvm",
+            parent_device=parent_device, free_device=free_device, has_extended=False)
+
+        self.assertFalse(hasattr(advanced_options, "partition_combo"))
+        self.assertTrue(hasattr(advanced_options, "pesize_combo"))
+
+        advanced_options = AdvancedOptions(add_dialog=self.add_dialog, device_type="lvmvg",
+            parent_device=parent_device, free_device=free_device, has_extended=False)
+
+        self.assertFalse(hasattr(advanced_options, "partition_combo"))
+        self.assertTrue(hasattr(advanced_options, "pesize_combo"))
+
+    def test_partition_options(self):
+        # test partition options are displayed for partition type
+
+        parent_device = Mock(format=Mock(labelType="msdos"))
+        free_device = Mock(isLogical=False)
+
+        advanced_options = AdvancedOptions(add_dialog=self.add_dialog, device_type="partition",
+            parent_device=parent_device, free_device=free_device, has_extended=False)
+
+        self.assertTrue(hasattr(advanced_options, "partition_combo"))
+        self.assertFalse(hasattr(advanced_options, "pesize_combo"))
+
+    def test_normal_partition(self):
+        # "standard" situation -- disk with msdos part table, no existing extended partition
+        # → both "primary and extended" types should be allowed
+
+        parent_device = Mock(format=Mock(labelType="msdos"))
+        free_device = Mock(isLogical=False)
+
+        advanced_options = AdvancedOptions(add_dialog=self.add_dialog, device_type="partition",
+            parent_device=parent_device, free_device=free_device, has_extended=False)
+
+        part_types = advanced_options.partition_combo.get_model()
+
+        self.assertEqual(len(part_types), 2)
+        self.assertEqual(part_types[0][1], "primary")
+        self.assertEqual(part_types[1][1], "extended")
+
+    def test_logical_partition(self):
+        # adding partition to free space inside extended partition -> only "logical allowed"
+
+        parent_device = Mock(format=Mock(labelType="msdos"))
+        free_device = Mock(isLogical=True)
+
+        advanced_options = AdvancedOptions(add_dialog=self.add_dialog, device_type="partition",
+            parent_device=parent_device, free_device=free_device, has_extended=True)
+
+        part_types = advanced_options.partition_combo.get_model()
+
+        self.assertEqual(len(part_types), 1)
+        self.assertEqual(part_types[0][1], "logical")
+
+    def test_extended_partition(self):
+        # extended partition already exists -> allow only "primary" type
+
+        parent_device = Mock(format=Mock(labelType="msdos"))
+        free_device = Mock(isLogical=False)
+
+        advanced_options = AdvancedOptions(add_dialog=self.add_dialog, device_type="partition",
+            parent_device=parent_device, free_device=free_device, has_extended=True)
+
+        part_types = advanced_options.partition_combo.get_model()
+
+        self.assertEqual(len(part_types), 1)
+        self.assertEqual(part_types[0][1], "primary")
+
+    def test_gpt_partitions(self):
+        # adding partition on gpt disk -> only "primary" type allowed
+        parent_device = Mock(format=Mock(labelType="gpt"))
+        free_device = Mock(isLogical=False)
+
+        advanced_options = AdvancedOptions(add_dialog=self.add_dialog, device_type="partition",
+            parent_device=parent_device, free_device=free_device, has_extended=False)
+
+        part_types = advanced_options.partition_combo.get_model()
+
+        self.assertEqual(len(part_types), 1)
+        self.assertEqual(part_types[0][1], "primary")
 
 if __name__ == "__main__":
     unittest.main()
