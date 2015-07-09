@@ -118,34 +118,24 @@ class BlivetGUI(object):
 
         ### MainMenu
         self.main_menu = MainMenu(self)
-        self.builder.get_object("vbox").add(self.main_menu.menu_bar)
 
         ### ActionsMenu
         self.popup_menu = ActionsMenu(self)
 
         ### ActionsToolbar
         self.toolbar = ActionsToolbar(self)
-        self.builder.get_object("vbox").add(self.toolbar.toolbar)
 
         ### ListDevices
         self.list_devices = ListDevices(self)
-        self.builder.get_object("disks_viewport").add(self.list_devices.disks_view)
 
         ### ListPartitions
         self.list_partitions = ListPartitions(self)
-        self.builder.get_object("partitions_viewport").add(self.list_partitions.partitions_view)
-        self.partitions_label = self.builder.get_object("partitions_page")
-        self.partitions_label.set_text(_("Partitions"))
 
         ### ListActions
         self.list_actions = ListActions(self)
-        self.builder.get_object("actions_viewport").add(self.list_actions.actions_view)
-        self.actions_label = self.builder.get_object("actions_page")
-        self.actions_label.set_text(_("Pending actions ({0})").format(self.list_actions.actions))
-
-        ### DeviceInfo
-        self.device_info = DeviceInfo(self)
-        self.builder.get_object("pv_viewport").add(self.device_info.info_label)
+        # self.builder.get_object("actions_viewport").add(self.list_actions.actions_view)
+        # self.actions_label = self.builder.get_object("actions_page")
+        # self.actions_label.set_text(_("Pending actions ({0})").format(self.list_actions.actions))
 
         ### DeviceCanvas
         self.device_canvas = DeviceCanvas(self)
@@ -161,9 +151,6 @@ class BlivetGUI(object):
                                             self.list_partitions.partitions_view,
                                             self.list_devices.selected_device)
 
-        if device_changed:
-            self.device_info.update_device_info(self.list_devices.selected_device)
-
     def activate_options(self, activate_list):
         """ Activate toolbar buttons and menu items
 
@@ -174,7 +161,6 @@ class BlivetGUI(object):
 
         for item in activate_list:
             self.toolbar.activate_buttons([item])
-            self.main_menu.activate_menu_items([item])
             self.popup_menu.activate_menu_items([item])
 
     def deactivate_options(self, deactivate_list):
@@ -187,7 +173,6 @@ class BlivetGUI(object):
 
         for item in deactivate_list:
             self.toolbar.deactivate_buttons([item])
-            self.main_menu.deactivate_menu_items([item])
             self.popup_menu.deactivate_menu_items([item])
 
     def deactivate_all_options(self):
@@ -195,7 +180,6 @@ class BlivetGUI(object):
         """
 
         self.toolbar.deactivate_all()
-        self.main_menu.deactivate_all()
         self.popup_menu.deactivate_all()
 
     def kickstart_disk_selection(self):

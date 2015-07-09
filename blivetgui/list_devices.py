@@ -54,7 +54,7 @@ class ListDevices(object):
         # currently selected device
         self.selected_device = None
 
-        self.device_list = Gtk.ListStore(object, GdkPixbuf.Pixbuf, str)
+        self.device_list = self.blivet_gui.builder.get_object("liststore_devices")
         num_devices = self.load_devices()
 
         if not num_devices:
@@ -63,7 +63,7 @@ class ListDevices(object):
             self.blivet_gui.show_error_dialog(msg)
             sys.exit(0)
 
-        self.disks_view = self.create_devices_view()
+        self.disks_view = self.blivet_gui.builder.get_object("treeview_devices")
 
         selection = self.disks_view.get_selection()
         self.selection_signal = selection.connect("changed", self.on_disk_selection_changed)
@@ -152,24 +152,6 @@ class ListDevices(object):
 
         if not selected:
             self.disks_view.set_cursor(1)
-
-    def create_devices_view(self):
-        """ Create view for devices
-        """
-
-        treeview = Gtk.TreeView(model=self.device_list)
-
-        renderer_pixbuf = Gtk.CellRendererPixbuf()
-        column_pixbuf = Gtk.TreeViewColumn(None, renderer_pixbuf, pixbuf=1)
-        treeview.append_column(column_pixbuf)
-
-        renderer_text = Gtk.CellRendererText()
-        column_text = Gtk.TreeViewColumn('Pango Markup', renderer_text, markup=2)
-        treeview.append_column(column_text)
-
-        treeview.set_headers_visible(False)
-
-        return treeview
 
     def on_disk_selection_changed(self, selection):
         """ Onselect action for devices

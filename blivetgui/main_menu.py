@@ -44,149 +44,20 @@ class MainMenu(object):
 
         self.blivet_gui = blivet_gui
 
-        self.menu_bar = Gtk.MenuBar()
+        menuitem_reload = self.blivet_gui.builder.get_object("menuitem_reload")
+        menuitem_reload.connect("activate", self.blivet_gui.reload)
 
-        self.icon_theme = Gtk.IconTheme.get_default()
+        # menuitem_actions = self.blivet_gui.builder.get_object("menuitem_actions")
+        # menuitem_actions.connect("activate", ) #FIXME
 
-        self.agr = Gtk.AccelGroup()
-        self.blivet_gui.main_window.add_accel_group(self.agr)
+        menuitem_quit = self.blivet_gui.builder.get_object("menuitem_quit")
+        menuitem_quit.connect("activate", self.blivet_gui.quit)
 
-        self.menu_items = {}
+        menuitem_help = self.blivet_gui.builder.get_object("menuitem_help")
+        menuitem_help.connect("activate", self.on_help_item)
 
-        self.menu_bar.add(self.add_file_menu())
-        self.menu_bar.add(self.add_edit_menu())
-        self.menu_bar.add(self.add_device_menu())
-        self.menu_bar.add(self.add_help_menu())
-
-    def add_file_menu(self):
-        """ Menu item 'File'
-        """
-
-        file_menu_item = Gtk.MenuItem(label=_("File"))
-        file_menu = Gtk.Menu()
-        file_menu_item.set_submenu(file_menu)
-
-        items = [(None, _("Reload"), "<Control>R", self.blivet_gui.reload, None),
-                 (None, _("Quit"), "<Control>Q", self.blivet_gui.quit)
-                ]
-
-        self.add_to_menu(file_menu, items)
-
-        return file_menu_item
-
-    def add_edit_menu(self):
-        """ Menu item 'Edit'
-        """
-
-        edit_menu_item = Gtk.MenuItem(label=_("Edit"))
-        edit_menu = Gtk.Menu()
-        edit_menu_item.set_submenu(edit_menu)
-
-        items = [("undo", _("Undo Last Action"), "<Control>Z", self.blivet_gui.actions_undo),
-                 ("clear", _("Clear Queued Actions"), None, self.blivet_gui.clear_actions),
-                 ("apply", _("Apply Queued Actions"), "<Control>A", self.blivet_gui.apply_event)
-                ]
-
-        self.add_to_menu(edit_menu, items)
-
-        return edit_menu_item
-
-    def add_device_menu(self):
-        """ Menu item 'Device'
-        """
-
-        device_menu_item = Gtk.MenuItem(label=_("Device"))
-        device_menu = Gtk.Menu()
-        device_menu_item.set_submenu(device_menu)
-
-        items = [("add", _("New"), "Insert", self.blivet_gui.add_partition),
-                 ("delete", _("Delete"), "Delete", self.blivet_gui.delete_selected_partition),
-                 ("edit", _("Edit"), None, self.blivet_gui.edit_device),
-                 ("separator",),
-                 ("unmount", _("Unmount"), None, self.blivet_gui.umount_partition),
-                 ("decrypt", _("Decrypt"), None, self.blivet_gui.decrypt_device)
-                ]
-
-        self.add_to_menu(device_menu, items)
-
-        return device_menu_item
-
-    def add_help_menu(self):
-        """ Menu item 'Help'
-        """
-
-        help_menu_item = Gtk.MenuItem(label=_("Help"))
-        help_menu = Gtk.Menu()
-        help_menu_item.set_submenu(help_menu)
-
-        items = [(None, _("Contents"), "F1", self.on_help_item),
-                 (None, _("About"), None, self.on_about_item),
-                ]
-
-        self.add_to_menu(help_menu, items)
-
-        return help_menu_item
-
-    def add_to_menu(self, menu, items):
-        """ Add items to menu
-
-            :param menu: menu
-            :type menu: Gtk.Menu
-            :param items: list of items to add
-            :type items: list of Gtk.MenuItem
-
-        """
-
-        for item in items:
-            if item[0] == "separator":
-                menu.append(Gtk.SeparatorMenuItem())
-                continue
-
-            menu_item = Gtk.MenuItem()
-            menu_item.set_label(item[1])
-            menu_item.connect("activate", item[3])
-
-            if item[2]:
-                key, mod = Gtk.accelerator_parse(item[2])
-                menu_item.add_accelerator("activate", self.agr, key, mod, Gtk.AccelFlags.VISIBLE)
-
-            if item[0]:
-                menu_item.set_sensitive(False)
-                self.menu_items[item[0]] = menu_item
-
-            menu.add(menu_item)
-
-    def activate_menu_items(self, menu_item_names):
-        """ Activate selected menu items
-
-            :param menu_item_names: names of menu items to activate
-            :type button_names: list of str
-
-        """
-
-        for item in menu_item_names:
-            if item in self.menu_items.keys():
-                self.menu_items[item].set_sensitive(True)
-
-    def deactivate_menu_items(self, menu_item_names):
-        """ Deactivate selected buttons
-
-            :param menu_item_names: names of menu items to activate
-            :type button_names: list of str
-
-        """
-
-        for item in menu_item_names:
-            if item in self.menu_items.keys():
-                self.menu_items[item].set_sensitive(False)
-
-    def deactivate_all(self):
-        """ Deactivate all partition based buttons
-        """
-
-        for item in self.menu_items:
-            if item not in ("apply", "clear", "undo"):
-                self.menu_items[item].set_sensitive(False)
+        menuitem_about = self.blivet_gui.builder.get_object("menuitem_about")
+        menuitem_about.connect("activate", self.on_about_item)
 
     def on_about_item(self, *_args):
         """ Onselect action for 'About'

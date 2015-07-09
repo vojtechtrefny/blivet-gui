@@ -42,10 +42,8 @@ class ListPartitions(object):
 
         self.kickstart_mode = self.blivet_gui.kickstart_mode
 
-        self.partitions_list = Gtk.TreeStore(object, str, str, str, str, str, str, object)
-
-        self.partitions_view = self.create_partitions_view()
-        self.partitions_view.set_has_tooltip(True)
+        self.partitions_list = self.blivet_gui.builder.get_object("liststore_logical")
+        self.partitions_view = self.blivet_gui.builder.get_object("treeview_logical")
 
         self.select = self.partitions_view.get_selection()
         self.on_partition_selection_changed(self.select)
@@ -130,79 +128,24 @@ class ListPartitions(object):
             name = name[:15] + "..."
 
         if partition.type == "free space":
-            iter_added = self.partitions_list.append(parent, [partition, name, "--", "--",
-                                                              str(partition.size), "--",
-                                                              None, None])
+            iter_added = self.partitions_list.append(parent, [partition, name, "free_space", "--", str(partition.size), "--"])
 
         elif partition.type == "partition" and hasattr(partition, "isExtended") \
              and partition.isExtended:
-            iter_added = self.partitions_list.append(None, [partition, name,
-                                                            _("extended"), "--",
-                                                            str(partition.size), "--",
-                                                            None, None])
+            iter_added = self.partitions_list.append(None, [partition, name, partition.type, _("extended"), str(partition.size), "--"])
+
         elif partition.type == "lvmvg":
-            iter_added = self.partitions_list.append(parent, [partition, name, _("lvmvg"),
-                                                              "--", str(partition.size), "--",
-                                                              None, None])
+            iter_added = self.partitions_list.append(parent, [partition, name, partition.type, "--", str(partition.size), "--"])
 
         elif partition.format.mountable:
-
-            if partition.format.minSize not in (None, 0, partition.size) \
-               and partition.format.type not in ("btrfs",):
-                resize_size = partition.format.minSize
-
-            else:
-                resize_size = "--"
-
-            if self.kickstart_mode:
-                iter_added = self.partitions_list.append(parent, [partition, name,
-                                                                  partition.format.type,
-                                                                  partition.format.systemMountpoint,
-                                                                  str(partition.size),
-                                                                  str(resize_size),
-                                                                  partition.format.mountpoint, None])
-
-            else:
-                iter_added = self.partitions_list.append(parent, [partition, name,
-                                                                  partition.format.type,
-                                                                  partition.format.systemMountpoint,
-                                                                  str(partition.size),
-                                                                  str(resize_size), None, None])
+            iter_added = self.partitions_list.append(parent, [partition, name, partition.type, partition.format.type,
+                                                                  str(partition.size), partition.format.systemMountpoint])
 
         else:
-            iter_added = self.partitions_list.append(parent, [partition, name,
-                                                              partition.format.type, "--",
-                                                              str(partition.size),
-                                                              str(resize_size), None, None])
+            iter_added = self.partitions_list.append(parent, [partition, name, partition.type, partition.format.type,
+                                                              str(partition.size), "--"])
 
         return iter_added
-
-    def create_partitions_view(self):
-        """ Create Gtk.TreeView for device children (partitions)
-        """
-
-        partitions = self.partitions_list
-
-        treeview = Gtk.TreeView(model=partitions)
-        treeview.set_vexpand(True)
-
-        renderer_text = Gtk.CellRendererText(ellipsize=Pango.EllipsizeMode.END)
-
-        columns = (_("Partition"), _("Filesystem"), _("Mountpoint"), _("Size"), ("Used"))
-        if self.kickstart_mode:
-            columns += (_("Installation Mountpoint"),)
-
-        for idx, column in enumerate(columns):
-            treeview_column = Gtk.TreeViewColumn(column, renderer_text, text=idx + 1)
-            treeview_column.set_expand(True)
-            treeview_column.set_resizable(True)
-            treeview.append_column(treeview_column)
-
-        treeview.set_headers_visible(True)
-
-        treeview.connect("button-release-event", self.on_right_click_event)
-
-        return treeview
 
     def on_right_click_event(self, treeview, event):
         """ Right click event on partition treeview
@@ -317,4 +260,4 @@ class ListPartitions(object):
             self.blivet_gui.deactivate_all_options()
             self.activate_action_buttons(model[treeiter])
             self.selected_partition = model[treeiter]
-            self.blivet_gui.device_canvas.update_visualisation()
+            # self.blivet_gui.device_canvas.update_visualisation()
