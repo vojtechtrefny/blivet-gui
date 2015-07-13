@@ -89,6 +89,10 @@ class DeviceToolbar(BlivetGUIToolbar):
         toolbutton_decrypt.connect("clicked", self.blivet_gui.decrypt_device)
         self.buttons["decrypt"] = toolbutton_decrypt
 
+        toolbutton_info = self.blivet_gui.builder.get_object("toolbutton_info")
+        toolbutton_info.connect("clicked", self.blivet_gui.device_information)
+        self.buttons["info"] = toolbutton_info
+
     def deactivate_all(self):
         """ Deactivate all partition based buttons
         """
