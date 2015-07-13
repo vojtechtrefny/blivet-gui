@@ -29,7 +29,7 @@ from .list_partitions import ListPartitions
 from .list_actions import ListActions
 from .main_menu import MainMenu
 from .actions_menu import ActionsMenu
-from .actions_toolbar import ActionsToolbar
+from .actions_toolbar import ActionsToolbar, DeviceToolbar
 from .device_info import DeviceInfo
 from .devicevisualization.device_canvas import DeviceCanvas
 
@@ -123,7 +123,8 @@ class BlivetGUI(object):
         self.popup_menu = ActionsMenu(self)
 
         ### ActionsToolbar
-        self.toolbar = ActionsToolbar(self)
+        self.device_toolbar = DeviceToolbar(self)
+        self.actions_toolbar = ActionsToolbar(self)
 
         ### ListDevices
         self.list_devices = ListDevices(self)
@@ -159,8 +160,13 @@ class BlivetGUI(object):
 
         """
 
+        # FIXME: separate functions for device_toolbar and actions_toolbar
+        # calling both works because (de)activate_buttons method checks if
+        # the toolbar actually has the button
+
         for item in activate_list:
-            self.toolbar.activate_buttons([item])
+            self.device_toolbar.activate_buttons([item])
+            self.actions_toolbar.activate_buttons([item])
             self.popup_menu.activate_menu_items([item])
 
     def deactivate_options(self, deactivate_list):
@@ -172,14 +178,16 @@ class BlivetGUI(object):
         """
 
         for item in deactivate_list:
-            self.toolbar.deactivate_buttons([item])
+            self.device_toolbar.deactivate_buttons([item])
+            self.actions_toolbar.deactivate_buttons([item])
             self.popup_menu.deactivate_menu_items([item])
 
     def deactivate_all_options(self):
         """ Deactivate all partition-based buttons/menu items
         """
 
-        self.toolbar.deactivate_all()
+        self.device_toolbar.deactivate_all()
+        self.actions_toolbar.deactivate_all()
         self.popup_menu.deactivate_all()
 
     def kickstart_disk_selection(self):

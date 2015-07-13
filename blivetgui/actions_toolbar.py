@@ -32,35 +32,11 @@ _ = lambda x: gettext.translation("blivet-gui", fallback=True).gettext(x) if x !
 
 #------------------------------------------------------------------------------#
 
-class ActionsToolbar(object):
-    """ Create toolbar with action buttons
-    """
+class BlivetGUIToolbar(object):
 
     def __init__(self, blivet_gui):
         self.blivet_gui = blivet_gui
-
-        # Dict to translate button names (str) to buttons (Gtk.ToolButton)
         self.buttons = {}
-
-        toolbutton_add = self.blivet_gui.builder.get_object("toolbutton_add")
-        toolbutton_add.connect("clicked", self.blivet_gui.add_partition)
-        self.buttons["add"] = toolbutton_add
-
-        toolbutton_remove = self.blivet_gui.builder.get_object("toolbutton_remove")
-        toolbutton_remove.connect("clicked", self.blivet_gui.delete_selected_partition)
-        self.buttons["delete"] = toolbutton_remove
-
-        toolbutton_edit = self.blivet_gui.builder.get_object("toolbutton_edit")
-        toolbutton_edit.connect("clicked", self.blivet_gui.edit_device)
-        self.buttons["edit"] = toolbutton_edit
-
-        toolbutton_unmount = self.blivet_gui.builder.get_object("toolbutton_unmount")
-        toolbutton_unmount.connect("clicked", self.blivet_gui.umount_partition)
-        self.buttons["unmount"] = toolbutton_unmount
-
-        toolbutton_decrypt = self.blivet_gui.builder.get_object("toolbutton_decrypt")
-        toolbutton_decrypt.connect("clicked", self.blivet_gui.decrypt_device)
-        self.buttons["decrypt"] = toolbutton_decrypt
 
     def activate_buttons(self, button_names):
         """ Activate selected buttons
@@ -86,9 +62,56 @@ class ActionsToolbar(object):
             if button in self.buttons.keys():
                 self.buttons[button].set_sensitive(False)
 
+class DeviceToolbar(BlivetGUIToolbar):
+    """ Create toolbar with action buttons
+    """
+
+    def __init__(self, blivet_gui):
+        super(DeviceToolbar, self).__init__(blivet_gui)
+
+        toolbutton_add = self.blivet_gui.builder.get_object("toolbutton_add")
+        toolbutton_add.connect("clicked", self.blivet_gui.add_partition)
+        self.buttons["add"] = toolbutton_add
+
+        toolbutton_remove = self.blivet_gui.builder.get_object("toolbutton_remove")
+        toolbutton_remove.connect("clicked", self.blivet_gui.delete_selected_partition)
+        self.buttons["delete"] = toolbutton_remove
+
+        toolbutton_edit = self.blivet_gui.builder.get_object("toolbutton_edit")
+        toolbutton_edit.connect("clicked", self.blivet_gui.edit_device)
+        self.buttons["edit"] = toolbutton_edit
+
+        toolbutton_unmount = self.blivet_gui.builder.get_object("toolbutton_unmount")
+        toolbutton_unmount.connect("clicked", self.blivet_gui.umount_partition)
+        self.buttons["unmount"] = toolbutton_unmount
+
+        toolbutton_decrypt = self.blivet_gui.builder.get_object("toolbutton_decrypt")
+        toolbutton_decrypt.connect("clicked", self.blivet_gui.decrypt_device)
+        self.buttons["decrypt"] = toolbutton_decrypt
+
     def deactivate_all(self):
         """ Deactivate all partition based buttons
         """
 
         for button in self.buttons:
             self.buttons[button].set_sensitive(False)
+
+class ActionsToolbar(BlivetGUIToolbar):
+
+    def __init__(self, blivet_gui):
+        super(ActionsToolbar, self).__init__(blivet_gui)
+
+        button_apply = self.blivet_gui.builder.get_object("button_apply")
+        button_apply.connect("clicked", self.blivet_gui.apply_event)
+        self.buttons["apply"] = button_apply
+
+        button_clear = self.blivet_gui.builder.get_object("button_clear")
+        button_clear.connect("clicked", self.blivet_gui.clear_actions)
+        self.buttons["clear"] = button_clear
+
+        button_back = self.blivet_gui.builder.get_object("button_back")
+        button_back.connect("clicked", self.blivet_gui.actions_undo)
+        self.buttons["undo"] = button_back
+
+    def deactivate_all(self):
+        pass

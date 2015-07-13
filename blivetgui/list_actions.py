@@ -151,4 +151,4 @@ class ListActions(object):
         # remove all actions from list of actions
         self.history = []
 
-        # self.blivet_gui.deactivate_options(["clear", "apply", "undo"])
+        self.blivet_gui.deactivate_options(["clear", "apply", "undo"])
