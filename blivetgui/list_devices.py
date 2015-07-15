@@ -22,7 +22,7 @@
 #
 #------------------------------------------------------------------------------#
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk
 
 import gettext
 

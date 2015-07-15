@@ -152,24 +152,28 @@ class BlivetGUI(object):
                                             self.list_partitions.partitions_view,
                                             self.list_devices.selected_device)
 
-    def activate_options(self, activate_list):
-        """ Activate toolbar buttons and menu items
+    def activate_action_buttons(self, activate):
+        """ Set the actions toolbar buttons (in)active
+        """
+
+        if activate:
+            self.actions_toolbar.activate_buttons(["clear", "apply", "undo"])
+        else:
+            self.actions_toolbar.deactivate_buttons(["clear", "apply", "undo"])
+
+    def activate_device_actions(self, activate_list):
+        """ Activate available device actions in device toolbar and popup menu
 
             :param activate_list: list of items to activate
             :type activate_list: list of str
 
         """
 
-        # FIXME: separate functions for device_toolbar and actions_toolbar
-        # calling both works because (de)activate_buttons method checks if
-        # the toolbar actually has the button
-
         for item in activate_list:
             self.device_toolbar.activate_buttons([item])
-            self.actions_toolbar.activate_buttons([item])
             self.popup_menu.activate_menu_items([item])
 
-    def deactivate_options(self, deactivate_list):
+    def deactivate_device_actions(self, deactivate_list):
         """ Deactivate toolbar buttons and menu items
 
             :param deactivate_list: list of items to deactivate
@@ -179,15 +183,13 @@ class BlivetGUI(object):
 
         for item in deactivate_list:
             self.device_toolbar.deactivate_buttons([item])
-            self.actions_toolbar.deactivate_buttons([item])
             self.popup_menu.deactivate_menu_items([item])
 
-    def deactivate_all_options(self):
+    def deactivate_all_actions(self):
         """ Deactivate all partition-based buttons/menu items
         """
 
         self.device_toolbar.deactivate_all()
-        self.actions_toolbar.deactivate_all()
         self.popup_menu.deactivate_all()
 
     def kickstart_disk_selection(self):

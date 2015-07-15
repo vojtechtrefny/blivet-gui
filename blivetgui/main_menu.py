@@ -24,8 +24,6 @@
 
 import gettext
 
-from gi.repository import Gtk
-
 from .dialogs.other_dialogs import AboutDialog
 
 import os, subprocess

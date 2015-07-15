@@ -22,8 +22,6 @@
 #
 #------------------------------------------------------------------------------#
 
-from gi.repository import Gtk, Pango
-
 import gettext
 
 #------------------------------------------------------------------------------#
@@ -121,7 +119,6 @@ class ListPartitions(object):
 
         """
 
-        resize_size = "--"
         name = partition.name
 
         if len(name) > 18:
@@ -229,26 +226,26 @@ class ListPartitions(object):
 
         device = selected_device[0]
 
-        self.blivet_gui.deactivate_all_options()
+        self.blivet_gui.deactivate_all_actions()
 
         if device.type not in ("free space",):
-            self.blivet_gui.activate_options(["info"])
+            self.blivet_gui.activate_device_actions(["info"])
 
         if self._allow_delete_device(device):
-            self.blivet_gui.activate_options(["delete"])
+            self.blivet_gui.activate_device_actions(["delete"])
 
         if self._allow_edit_device(device):
-            self.blivet_gui.activate_options(["edit"])
+            self.blivet_gui.activate_device_actions(["edit"])
 
         if device.type in ("free space", "btrfs volume", "lvmlv", "lvmthinpool"):
-            self.blivet_gui.activate_options(["add"])
+            self.blivet_gui.activate_device_actions(["add"])
 
         if device.format:
             if device.format.type == "luks" and not device.format.status and device.format.exists:
-                self.blivet_gui.activate_options(["decrypt"])
+                self.blivet_gui.activate_device_actions(["decrypt"])
 
             elif device.format.mountable and device.format.systemMountpoint:
-                self.blivet_gui.activate_options(["unmount"])
+                self.blivet_gui.activate_device_actions(["unmount"])
 
     def on_partition_selection_changed(self, selection):
         """ On selected partition action
@@ -257,7 +254,7 @@ class ListPartitions(object):
         model, treeiter = selection.get_selected()
 
         if treeiter != None:
-            self.blivet_gui.deactivate_all_options()
+            self.blivet_gui.deactivate_all_actions()
             self.activate_action_buttons(model[treeiter])
             self.selected_partition = model[treeiter]
-            # self.blivet_gui.device_canvas.update_visualisation()
+            self.blivet_gui.device_canvas.update_visualisation()

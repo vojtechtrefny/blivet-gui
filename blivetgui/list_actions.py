@@ -63,6 +63,8 @@ class ListActions(object):
 
         self.action_icons = {"add" : icon_add, "delete" : icon_delete, "edit" : icon_edit}
 
+        self.blivet_gui.activate_action_buttons(False)
+
     def create_actions_view(self):
         """ Create treeview for actions
 
@@ -114,7 +116,7 @@ class ListActions(object):
         self.history.append(blivet_actions)
 
         # activate 'actions-related' options
-        self.blivet_gui.activate_options(["apply", "clear", "undo"])
+        self.blivet_gui.activate_action_buttons(True)
 
     def pop(self):
         """ Remove last action from the list of actions
@@ -133,7 +135,7 @@ class ListActions(object):
 
         # deactivate 'actions-related' options (if there are no actions)
         if not self.actions:
-            self.blivet_gui.deactivate_options(["clear", "apply", "undo"])
+            self.blivet_gui.activate_action_buttons(False)
 
         return self.history.pop()
 
@@ -151,4 +153,4 @@ class ListActions(object):
         # remove all actions from list of actions
         self.history = []
 
-        self.blivet_gui.deactivate_options(["clear", "apply", "undo"])
+        self.blivet_gui.activate_action_buttons(False)
