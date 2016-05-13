@@ -384,7 +384,6 @@ class AddDialog(Gtk.Dialog):
         self.mountpoints = mountpoints
 
         self.supported_raids = supported_raids()
-        self.supported_fs = supported_filesystems()
 
         Gtk.Dialog.__init__(self, _("Create new device"), None, 0,
                             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
@@ -436,7 +435,7 @@ class AddDialog(Gtk.Dialog):
             types.append((_("Partition"), "partition"))
 
             if self.selected_parent.size > size.Size("8 MiB"):
-                types.extend([(_("LVM2 Physical Volume"), "lvmpv"), (_("LVM2 Storage"), "lvm")])
+                types.extend([(_("LVM2 Storage"), "lvm")])
 
             if self.selected_parent.size > size.Size("256 MiB"):
                 types.append((_("Btrfs Volume"), "btrfs volume"))
@@ -447,7 +446,8 @@ class AddDialog(Gtk.Dialog):
         elif self.selected_parent.type == "lvmvg":
             types.extend([(_("LVM2 Logical Volume"), "lvmlv"), (_("LVM2 ThinPool"), "lvmthinpool")])
 
-        elif self.selected_parent.type in ("partition", "luks/dm-crypt", "mdarray") and self.selected_parent.format.type == "lvmpv":
+        elif (self.selected_parent.type in ("partition", "luks/dm-crypt", "mdarray") and
+              self.selected_parent.format.type == "lvmpv" and self.selected_parent.size >= size.Size("8 MiB")):
             types.append((_("LVM2 Volume Group"), "lvmvg"))
 
         elif self.selected_parent.type == "lvmlv":
@@ -604,7 +604,7 @@ class AddDialog(Gtk.Dialog):
 
         if self.selected_type == "lvmvg":
             for ftype, fdevice in self.available_free:
-                if ftype == "lvmpv":
+                if ftype == "lvmpv" and fdevice.size >= size.Size("8 MiB"):
                     self.parents_store.append([fdevice.parents[0], fdevice.size, False, False,
                                                fdevice.parents[0].name, ftype, str(fdevice.size)])
 
@@ -688,7 +688,7 @@ class AddDialog(Gtk.Dialog):
 
         if device_type in ("lvmlv", "lvmthinpool"):
             min_size = max(self.selected_parent.pe_size, size.Size("1 MiB"))
-        elif device_type in ("lvmpv", "lvm"):
+        elif device_type == "lvm":
             min_size = size.Size("8 MiB")
         elif device_type in ("lvmthinlv", "lvm snapshot"):
             min_size = max(self.selected_parent.vg.pe_size, size.Size("1 MiB"))
@@ -778,26 +778,32 @@ class AddDialog(Gtk.Dialog):
         filesystems_combo.set_entry_text_column(0)
         filesystems_combo.set_id_column(0)
 
-        for fs in self.supported_fs:
-            filesystems_combo.append_text(fs)
-
         self.grid.attach(filesystems_combo, 1, 8, 2, 1)
 
-        if "ext4" in self.supported_fs:
-            filesystems_combo.set_active(self.supported_fs.index("ext4"))
-        else:
-            filesystems_combo.set_active(0)
-
         filesystems_combo.connect("changed", self.on_filesystems_combo_changed)
-
         self.widgets_dict["fs"] = [label_fs, filesystems_combo]
 
         return filesystems_combo
 
+    def update_fs_chooser(self):
+        self.filesystems_combo.remove_all()
+
+        supported_fs = supported_filesystems()
+        if self.selected_free.size < size.Size("8 MiB") and "lvmpv" in supported_fs:
+            supported_fs.remove("lvmpv")
+
+        for fs in supported_fs:
+            self.filesystems_combo.append_text(fs)
+
+        if "ext4" in supported_fs:
+            self.filesystems_combo.set_active(supported_fs.index("ext4"))
+        else:
+            self.filesystems_combo.set_active(0)
+
     def on_filesystems_combo_changed(self, combo):
         selection = combo.get_active_text()
 
-        if selection in ("swap",):
+        if selection in ("swap", "lmvpv"):
             self.hide_widgets(["label", "mountpoint"])
 
         else:
@@ -807,6 +813,13 @@ class AddDialog(Gtk.Dialog):
                 self.show_widgets(["label", "mountpoint"])
             else:
                 self.show_widgets(["mountpoint"])
+
+        # TODO: size limits for all formats
+        dev_min_size = self._get_min_size()
+        if selection == "lvmpv":
+            self.update_size_area_limits(min_size=max(dev_min_size, size.Size("8 MiB")))
+        else:
+            self.update_size_area_limits(dev_min_size)
 
     def add_name_chooser(self):
         label_label = Gtk.Label(label=_("Label:"), xalign=1)
@@ -947,6 +960,7 @@ class AddDialog(Gtk.Dialog):
         device_type = self.selected_type
 
         self.update_parent_list()
+        self.update_fs_chooser()
         self.add_advanced_options()
         self.encrypt_check.set_active(False)
         self.add_size_area()
@@ -954,10 +968,6 @@ class AddDialog(Gtk.Dialog):
         if device_type == "partition":
             self.show_widgets(["label", "fs", "encrypt", "mountpoint", "size", "advanced"])
             self.hide_widgets(["name", "passphrase", "mdraid"])
-
-        elif device_type == "lvmpv":
-            self.show_widgets(["encrypt", "size"])
-            self.hide_widgets(["name", "label", "fs", "mountpoint", "passphrase", "advanced", "mdraid"])
 
         elif device_type == "lvm":
             self.show_widgets(["encrypt", "name", "size", "advanced"])
