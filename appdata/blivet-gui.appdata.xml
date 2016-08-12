@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<application>
- <id type="desktop">blivet-gui.desktop</id>
- <metadata_license>CC-BY-SA</metadata_license>
- <project_license>GPL-2.0+</project_license>
- <name>blivet-gui</name>
- <summary>Graphical tool for storage manipulation and configuration</summary>
- <description>
-  <p>
+<component type="desktop">
+  <id>blivet-gui.desktop</id>
+  <metadata_license>CC-BY-SA-3.0</metadata_license>
+  <project_license>GPL-2.0+</project_license>
+  <name>blivet-gui</name>
+  <summary>Graphical tool for storage manipulation and configuration</summary>
+  <description>
+    <p>
     Blivet-gui is a graphical tool that provides an easy way to create, delete or edit partitions, LVM, RAID or Btrfs volumes.
   </p>
-  <p>
+    <p>
     Available advanced options includes setting up encrypted devices (LUKS), LVM or Btrfs volumes spanning more drives and creating kickstart files for automated installations.
   </p>
- </description>
- <screenshots>
-   <screenshot type="default" width="800" height="637">
-     https://raw.github.com/rhinstaller/blivet-gui/devel/appdata/blivet-gui-main-window.png
-   </screenshot>
-   <screenshot width="617" height="699">
-     https://raw.github.com/rhinstaller/blivet-gui/devel/appdata/blivet-gui-add-dialog.png
-   </screenshot>
- </screenshots>
- <url type="homepage">https://github.com/rhinstaller/blivet-gui</url>
- <updatecontact>vtrefny@redhat.com</updatecontact>
-</application>
+  </description>
+  <screenshots>
+    <screenshot type="default" width="802" height="602">
+      <image>
+     https://raw.github.com/rhinstaller/blivet-gui/master/appdata/blivet-gui-main-window.png
+   </image>
+    </screenshot>
+    <screenshot width="555" height="636">
+      <image>
+     https://raw.github.com/rhinstaller/blivet-gui/master/appdata/blivet-gui-add-dialog.png
+   </image>
+    </screenshot>
+  </screenshots>
+  <url type="homepage">https://github.com/rhinstaller/blivet-gui</url>
+  <update_contact>vtrefny@redhat.com</update_contact>
+  <url type="bugtracker">https://github.com/rhinstaller/blivet-gui/issues</url>
+
+</component>
