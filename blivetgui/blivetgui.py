@@ -47,6 +47,7 @@ from .gui_utils import locate_ui_file
 from .dialogs import message_dialogs, other_dialogs, edit_dialog, add_dialog, device_info_dialog
 from .processing_window import ProcessingActions
 from .loading_window import LoadingWindow
+from .exception_handler import BlivetGUIExceptionHandler
 
 import threading
 import os
@@ -76,6 +77,11 @@ class BlivetGUI(object):
         # MainWindow
         self.main_window = self.builder.get_object("main_window")
         self.main_window.connect("delete-event", self.quit)
+
+        # Exception handling
+        self.exc = BlivetGUIExceptionHandler(self.main_window, sys.excepthook)
+        self.exc.allow_ignore = False  # don't allow to ignore exceptions right now
+        sys.excepthook = self.exc.handle_exception
 
         # BlivetUtils
         self.client = BlivetGUIClient(self, self.server_socket, self.secret)
@@ -123,6 +129,9 @@ class BlivetGUI(object):
         self.list_devices.disks_view.set_cursor(1)
         self.main_window.show_all()
         self.list_devices.disks_view.set_cursor(0)
+
+        # allow ignoring exceptions
+        self.exc.allow_ignore = True
 
     def _set_physical_view_visible(self, visible):
         notebook = self.builder.get_object("notebook_views")
@@ -216,9 +225,6 @@ class BlivetGUI(object):
 
     def _reraise_exception(self, exception, traceback):
         raise type(exception)(str(exception) + "\n" + traceback)
-
-    def show_exception_dialog(self, exception_data, exception_traceback):
-        message_dialogs.ExceptionDialog(self.main_window, exception_data, exception_traceback)
 
     def show_error_dialog(self, error_message):
         message_dialogs.ErrorDialog(self.main_window, error_message)
@@ -492,6 +498,9 @@ class BlivetGUI(object):
 
             return
 
+        # don't allow to ignore exceptions raised during do_it
+        self.exc.allow_ignore = False
+
         thread = threading.Thread(target=do_it)
         thread.start()
         dialog.start()
@@ -501,6 +510,9 @@ class BlivetGUI(object):
 
         self.list_devices.update_devices_view()
         self.update_partitions_view()
+
+        # allow ignoring exceptions now
+        self.exc.allow_ignore = True
 
     def apply_event(self, _widget=None):
         """ Apply event for main menu/toolbar
@@ -707,6 +719,9 @@ class BlivetGUI(object):
             if not response:
                 return
 
+        # don't allow to ignore exceptions raised during reset
+        self.exc.allow_ignore = False
+
         loading_window = LoadingWindow(self.main_window)
         self._run_thread(loading_window, self.client.remote_call, ("blivet_reset",))
 
@@ -717,6 +732,9 @@ class BlivetGUI(object):
 
         self.list_devices.update_devices_view()
         self.update_partitions_view()
+
+        # allow ignoring exceptions now
+        self.exc.allow_ignore = True
 
     def quit(self, _event=None, _widget=None):
         """ Quit blivet-gui

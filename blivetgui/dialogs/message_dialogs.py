@@ -29,6 +29,7 @@ from gi.repository import Gtk
 
 from blivetgui.gui_utils import locate_ui_file
 from .helpers import adjust_scrolled_size
+from .constants import DialogResponseType
 
 from ..i18n import _
 
@@ -96,22 +97,54 @@ class ExceptionDialog(object):
     """ Error dialog with traceback
     """
 
-    def __init__(self, parent_window, msg, traceback):
+    def __init__(self, parent_window, allow_ignore, allow_report, msg, traceback):
+
+        self.allow_ignore = allow_ignore
+        self.allow_report = allow_report
 
         builder = Gtk.Builder()
         builder.set_translation_domain("blivet-gui")
         builder.add_from_file(locate_ui_file('exception_dialog.ui'))
-        dialog = builder.get_object("exception_dialog")
+        self.dialog = builder.get_object("exception_dialog")
 
-        dialog.set_transient_for(parent_window)
-        dialog.format_secondary_text(msg)
+        self.dialog.set_transient_for(parent_window)
+        self.dialog.format_secondary_text(msg)
 
         exception_label = builder.get_object("exception_label")
         exception_label.set_text(traceback)
 
-        dialog.show_all()
-        dialog.run()
-        dialog.destroy()
+        self.button_back = builder.get_object("button_back")
+        self.button_back.connect("clicked", self._on_back_button)
+
+        self.button_report = builder.get_object("button_report")
+        self.button_report.connect("clicked", self._on_report_button)
+
+        button_quit = builder.get_object("button_quit")
+        button_quit.connect("clicked", self._on_quit_button)
+
+    def run(self):
+        self.dialog.show_all()
+
+        # hide buttons
+        if not self.allow_ignore:
+            self.button_back.hide()
+
+        if not self.allow_report:
+            self.button_report.hide()
+
+        response = self.dialog.run()
+        self.dialog.destroy()
+
+        return response
+
+    def _on_back_button(self, _button):
+        self.dialog.response(DialogResponseType.BACK)
+
+    def _on_report_button(self, _button):
+        self.dialog.response(DialogResponseType.REPORT)
+
+    def _on_quit_button(self, _button):
+        self.dialog.response(DialogResponseType.QUIT)
 
 
 class ConfirmDialog(object):

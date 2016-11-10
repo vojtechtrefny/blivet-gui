@@ -23,8 +23,21 @@
 # ---------------------------------------------------------------------------- #
 
 import os
+import shutil
 
 # ---------------------------------------------------------------------------- #
+
+
+def command_exists(command):
+    """ Find if given command exists
+    """
+
+    ret = shutil.which(command)
+
+    if ret is not None:
+        return True
+    else:
+        return False
 
 
 def locate_ui_file(filename):
