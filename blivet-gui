@@ -105,8 +105,10 @@ def main():
             sockfile, secret = output.split()
 
             from blivetgui.blivetgui import BlivetGUI
+            from blivetgui.communication.client import BlivetGUIClient
 
-            BlivetGUI(server_socket=sockfile, secret=secret)
+            client = BlivetGUIClient(server_socket=sockfile, secret=secret)
+            BlivetGUI(client)
 
             css_provider = Gtk.CssProvider()
             css_provider.load_from_path(locate_css_file("rectangle.css"))

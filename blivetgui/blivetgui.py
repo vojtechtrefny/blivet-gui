@@ -40,8 +40,6 @@ from .actions_toolbar import ActionsToolbar, DeviceToolbar
 from .visualization.logical_view import LogicalView
 from .visualization.physical_view import PhysicalView
 
-from .communication.client import BlivetGUIClient
-
 from .i18n import _
 from .gui_utils import locate_ui_file
 from .dialogs import message_dialogs, other_dialogs, edit_dialog, add_dialog, device_info_dialog
@@ -63,10 +61,9 @@ class BlivetGUI(object):
 
     installer_mode = False
 
-    def __init__(self, server_socket, secret):
+    def __init__(self, client):
 
-        self.server_socket = server_socket
-        self.secret = secret
+        self.client = client
 
         self.builder = Gtk.Builder()
         self.builder.set_translation_domain("blivet-gui")
@@ -84,7 +81,6 @@ class BlivetGUI(object):
         sys.excepthook = self.exc.handle_exception
 
         # BlivetUtils
-        self.client = BlivetGUIClient(self.server_socket, self.secret)
         self.blivet_init()
 
         # Atexit
