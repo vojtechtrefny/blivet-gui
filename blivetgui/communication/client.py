@@ -23,14 +23,12 @@
 
 import pickle
 
-import os
 import socket
 import struct
 
 from .proxy_utils import ProxyID, ProxyDataContainer
 from .errors import ServerConnectionError
 
-from ..dialogs.message_dialogs import ErrorDialog
 from ..i18n import _
 
 # ---------------------------------------------------------------------------- #

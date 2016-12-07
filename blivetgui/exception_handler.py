@@ -31,6 +31,7 @@ gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
 
+from .communication import errors
 from .dialogs import message_dialogs, constants
 from .gui_utils import command_exists
 from .i18n import _
@@ -49,14 +50,16 @@ class BlivetGUIExceptionHandler(object):
     def handle_exception(self, exc_type, exc_value, exc_traceback):
 
         tr = "".join(traceback.format_tb(exc_traceback))
-        if self.allow_ignore:
+
+        allow_report = command_exists("gnome-abrt")
+        allow_ignore = self.allow_ignore and not issubclass(exc_type, errors.CommunicationError)
+
+        if allow_ignore:
             msg = _("Unknow error occured.\n{error}").format(error=str(exc_value))
         else:
             msg = _("Unknow error occured. Blivet-gui will be terminated.\n{error}").format(error=str(exc_value))
 
-        allow_report = command_exists("gnome-abrt")
-
-        dialog = message_dialogs.ExceptionDialog(self.main_window, self.allow_ignore,
+        dialog = message_dialogs.ExceptionDialog(self.main_window, allow_ignore,
                                                  allow_report, msg, tr)
         response = dialog.run()
 
