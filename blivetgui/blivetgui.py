@@ -84,7 +84,7 @@ class BlivetGUI(object):
         sys.excepthook = self.exc.handle_exception
 
         # BlivetUtils
-        self.client = BlivetGUIClient(self, self.server_socket, self.secret)
+        self.client = BlivetGUIClient(self.server_socket, self.secret)
         self.blivet_init()
 
         # Atexit
