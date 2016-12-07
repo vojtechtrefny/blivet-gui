@@ -50,7 +50,6 @@ from .loading_window import LoadingWindow
 from .exception_handler import BlivetGUIExceptionHandler
 
 import threading
-import os
 import sys
 import atexit
 
@@ -62,11 +61,12 @@ class BlivetGUI(object):
         Gtk.Widgets used in blivet-gui.
     """
 
-    def __init__(self, server_socket, secret, kickstart_mode=False):
+    installer_mode = False
+
+    def __init__(self, server_socket, secret):
 
         self.server_socket = server_socket
         self.secret = secret
-        self.kickstart_mode = kickstart_mode
 
         self.builder = Gtk.Builder()
         self.builder.set_translation_domain("blivet-gui")
@@ -89,10 +89,6 @@ class BlivetGUI(object):
 
         # Atexit
         atexit.register(self.client.quit)
-
-        # Kickstart devices dialog
-        if self.kickstart_mode:
-            self.use_disks = self.kickstart_disk_selection()
 
         # MainMenu
         self.main_menu = MainMenu(self)
@@ -194,34 +190,6 @@ class BlivetGUI(object):
 
         self.device_toolbar.deactivate_all()
         self.popup_menu.deactivate_all()
-
-    def kickstart_disk_selection(self):
-        disks = self.client.remote_call("get_disks")
-
-        if len(disks) == 0:
-            msg = _("blivet-gui failed to find at least one storage device to work with.\n\n"
-                    "Please connect a storage device to your computer and re-run blivet-gui.")
-
-            self.show_error_dialog(msg)
-            self.quit()
-
-        dialog = other_dialogs.KickstartSelectDevicesDialog(self.main_window, disks)
-        response = dialog.run()
-
-        if response == Gtk.ResponseType.OK:
-            use_disks, install_bootloader, bootloader_device = dialog.get_selection()
-            dialog.destroy()
-
-        else:
-            dialog.destroy()
-            sys.exit(0)
-
-        if install_bootloader and bootloader_device:
-            self.client.remote_call("set_bootloader_device", bootloader_device)
-
-        self.client.remote_call("kickstart_hide_disks", use_disks)
-
-        return use_disks
 
     def _reraise_exception(self, exception, traceback):
         raise type(exception)(str(exception) + "\n" + traceback)
@@ -516,51 +484,21 @@ class BlivetGUI(object):
 
     def apply_event(self, _widget=None):
         """ Apply event for main menu/toolbar
-
             :param widget: widget calling this function (only for calls via signal.connect)
             :type widget: Gtk.Widget()
-
-        .. note::
-                This is neccessary because of kickstart mode -- in "standard" mode
-                we need only simple confirmation dialog, but in kickstart mode it
-                is neccessary to create file choosing dialog for kickstart file save.
-
         """
 
-        if self.kickstart_mode:
+        title = _("Confirm scheduled actions")
+        msg = _("Are you sure you want to perform scheduled actions?")
+        actions = self.client.remote_call("get_actions")
 
-            dialog = other_dialogs.KickstartFileSaveDialog(self.main_window)
+        dialog = message_dialogs.ConfirmActionsDialog(self.main_window, title, msg, self.list_actions.actions_list)
 
-            response = dialog.run()
+        response = dialog.run()
 
-            if response:
-                if os.path.isfile(response):
-                    title = _("File already exists")
-                    msg = _("Selected file already exists, do you want to overwrite it?")
-                    dialog_file = message_dialogs.ConfirmDialog(self.main_window, title, msg)
-                    response_file = dialog_file.run()
-
-                    if not response_file:
-                        return
-
-                self.client.remote_call("create_kickstart_file", response)
-
-                msg = _("File with your Kickstart configuration was successfully saved to:\n\n"
-                        "{filename}").format(filename=response)
-                message_dialogs.InfoDialog(self.main_window, msg)
-
-        else:
-            title = _("Confirm scheduled actions")
-            msg = _("Are you sure you want to perform scheduled actions?")
-            actions = self.client.remote_call("get_actions")
-
-            dialog = message_dialogs.ConfirmActionsDialog(self.main_window, title, msg, self.list_actions.actions_list)
-
-            response = dialog.run()
-
-            if response:
-                processing_dialog = ProcessingActions(self, actions)
-                self.perform_actions(processing_dialog)
+        if response:
+            processing_dialog = ProcessingActions(self, actions)
+            self.perform_actions(processing_dialog)
 
     def umount_partition(self, _widget=None):
         """ Unmount selected partition
@@ -641,7 +579,7 @@ class BlivetGUI(object):
 
     def blivet_init(self):
         loading_window = LoadingWindow(self.main_window)
-        ret = self._run_thread(loading_window, self.client.remote_control, ("init", self.ignored_disks, self.kickstart_mode))
+        ret = self._run_thread(loading_window, self.client.remote_control, ("init", self.ignored_disks))
 
         if not ret.success:  # pylint: disable=maybe-no-member
             # blivet-gui is already running --> quit
@@ -724,9 +662,6 @@ class BlivetGUI(object):
 
         loading_window = LoadingWindow(self.main_window)
         self._run_thread(loading_window, self.client.remote_call, ("blivet_reset",))
-
-        if self.kickstart_mode:
-            self.client.remote_call("kickstart_hide_disks", self.use_disks)
 
         self.list_actions.clear()
 

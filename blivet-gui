@@ -76,8 +76,6 @@ def parse_options():
     parser = optparse.OptionParser()
     parser.add_option("-v", "--version", action="store_true", dest="version", default=False,
                       help=_("show version information"))
-    parser.add_option("-k", "--kickstart", action="store_true", dest="kickstart", default=False,
-                      help=_("run blivet-gui in kickstart mode"))
 
     (options, _args) = parser.parse_args()
 
@@ -108,7 +106,7 @@ def main():
 
             from blivetgui.blivetgui import BlivetGUI
 
-            BlivetGUI(server_socket=sockfile, secret=secret, kickstart_mode=options.kickstart)
+            BlivetGUI(server_socket=sockfile, secret=secret)
 
             css_provider = Gtk.CssProvider()
             css_provider.load_from_path(locate_css_file("rectangle.css"))

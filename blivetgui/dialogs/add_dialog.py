@@ -401,7 +401,7 @@ class AddDialog(Gtk.Dialog):
          size, fs, label etc.
     """
 
-    def __init__(self, parent_window, selected_parent, selected_free, available_free, mountpoints=None, kickstart_mode=False):
+    def __init__(self, parent_window, selected_parent, selected_free, available_free, mountpoints=None, installer_mode=False):
         """
 
             :param str parent_type: type of (future) parent device
@@ -413,7 +413,7 @@ class AddDialog(Gtk.Dialog):
             :param free_disks_regions: list of free regions on non-empty disks
             :type free_disks_regions: list of :class:`blivetgui.utils.FreeSpaceDevice` instances
             :param list mountpoints: list of mountpoints in current devicetree
-            :param bool kickstart_mode: kickstart mode
+            :param bool installer_mode: installer mode
 
           """
 
@@ -424,7 +424,7 @@ class AddDialog(Gtk.Dialog):
 
         self.available_free = available_free
 
-        self.kickstart_mode = kickstart_mode
+        self.installer_mode = installer_mode
         self.mountpoints = mountpoints
 
         self.supported_raids = supported_raids()
@@ -451,7 +451,7 @@ class AddDialog(Gtk.Dialog):
 
         self.raid_combo, self.raid_changed_signal = self.add_raid_type_chooser()
 
-        if self.kickstart_mode:
+        if self.installer_mode:
             self.mountpoint_entry = self.add_mountpoint()
 
         self.devices_combo = self.add_device_chooser()
@@ -956,7 +956,7 @@ class AddDialog(Gtk.Dialog):
     def show_widgets(self, widget_types):
 
         for widget_type in widget_types:
-            if widget_type == "mountpoint" and not self.kickstart_mode:
+            if widget_type == "mountpoint" and not self.installer_mode:
                 continue
 
             elif widget_type == "size":
@@ -970,7 +970,7 @@ class AddDialog(Gtk.Dialog):
     def hide_widgets(self, widget_types):
 
         for widget_type in widget_types:
-            if widget_type == "mountpoint" and not self.kickstart_mode:
+            if widget_type == "mountpoint" and not self.installer_mode:
                 continue
 
             elif widget_type == "size":
@@ -1111,7 +1111,7 @@ class AddDialog(Gtk.Dialog):
 
             return False
 
-        if self.kickstart_mode and user_input.mountpoint:
+        if self.installer_mode and user_input.mountpoint:
             valid, msg = is_mountpoint_valid(self.mountpoints, user_input.mountpoint)
             if not valid:
                 message_dialogs.ErrorDialog(self, msg)
@@ -1164,7 +1164,7 @@ class AddDialog(Gtk.Dialog):
         else:
             raid_level = None
 
-        if self.kickstart_mode:
+        if self.installer_mode:
             mountpoint = self.mountpoint_entry.get_text()
         else:
             mountpoint = None
