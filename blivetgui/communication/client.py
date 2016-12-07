@@ -28,6 +28,7 @@ import socket
 import struct
 
 from .proxy_utils import ProxyID, ProxyDataContainer
+from .errors import ServerConnectionError
 
 from ..dialogs.message_dialogs import ErrorDialog
 from ..i18n import _
@@ -89,9 +90,7 @@ class BlivetGUIClient(object):
 
     id_dict = {}
 
-    def __init__(self, blivetgui, server_socket, secret):
-
-        self.blivetgui = blivetgui
+    def __init__(self, server_socket, secret):
 
         self.secret = secret
 
@@ -286,9 +285,8 @@ class BlivetGUIClient(object):
                 packet = self.sock.recv(length - len(data))
 
             except (OSError, BrokenPipeError) as e:
-                ErrorDialog(parent_window=self.blivetgui.main_window,
-                            msg=_("Failed to connect to blivet-gui-daemon.\n{err}").format(err=e))
-                os._exit(1)
+                msg = _("Failed to connect to blivet-gui-daemon")
+                raise ServerConnectionError(msg) from e
 
             if not packet:
                 return None
@@ -303,7 +301,6 @@ class BlivetGUIClient(object):
         try:
             self.sock.sendall(data)
 
-        except OSError as e:
-            ErrorDialog(parent_window=self.blivetgui.main_window,
-                        msg=_("Failed to connect to blivet-gui-daemon.\n{err}").format(err=e))
-            os._exit(1)
+        except (OSError, BrokenPipeError) as e:
+            msg = _("Failed to connect to blivet-gui-daemon")
+            raise ServerConnectionError(msg) from e
