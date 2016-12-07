@@ -24,7 +24,7 @@ class ListPartitionsTest(unittest.TestCase):
         _builder = Gtk.Builder()
         _builder.add_from_file(locate_ui_file("blivet-gui.ui"))
 
-        self.blivet_gui = MagicMock(kickstart_mode=False, builder=_builder)
+        self.blivet_gui = MagicMock(installer_mode=False, builder=_builder)
 
         self.list_partitions = ListPartitions(self.blivet_gui)
 
@@ -55,15 +55,6 @@ class ListPartitionsTest(unittest.TestCase):
 
         # protected devices can't be deleteded
         device = MagicMock(type="partition", isleaf=True, protected=True)
-        self.assertFalse(self.list_partitions._allow_delete_device(device))
-
-        # in kickstart mode, allow delete all leaves
-        self.list_partitions.kickstart_mode = True
-        device = MagicMock(type="partition", isleaf=True, format=MagicMock(type="swap", status=True), protected=False)
-        self.assertTrue(self.list_partitions._allow_delete_device(device))
-        device = MagicMock(type="partition", isleaf=True, format=MagicMock(type="ext4", mountable=True, status=True), protected=False)
-        self.assertTrue(self.list_partitions._allow_delete_device(device))
-        device = MagicMock(type="partition", isleaf=False, protected=False)
         self.assertFalse(self.list_partitions._allow_delete_device(device))
 
     def test_allow_add(self):

@@ -31,7 +31,7 @@ class ListPartitions(object):
 
         self.blivet_gui = blivet_gui
 
-        self.kickstart_mode = self.blivet_gui.kickstart_mode
+        self.installer_mode = self.blivet_gui.installer_mode
 
         self.partitions_list = self.blivet_gui.builder.get_object("liststore_logical")
         self.partitions_view = self.blivet_gui.builder.get_object("treeview_logical")
@@ -140,7 +140,7 @@ class ListPartitions(object):
         devtype = "lvm" if device.type == "lvmvg" else "raid" if device.type == "mdarray" else device.type
         name = device.name if len(device.name) < 18 else device.name[:15] + "..."  # FIXME
         fmt = device.format.type if device.format else None
-        if self.kickstart_mode:
+        if self.installer_mode:
             mnt = device.format.mountpoint if (device.format and device.format.mountable) else None
         else:
             mnt = device.format.system_mountpoint if (device.format and device.format.mountable) else None
@@ -157,7 +157,7 @@ class ListPartitions(object):
             return False
 
         else:
-            if self.kickstart_mode or not device.format.type:
+            if not device.format.type:
                 return True
 
             elif device.format.type == "swap":

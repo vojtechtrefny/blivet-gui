@@ -535,7 +535,7 @@ class AddDialogTest(unittest.TestCase):
         free_device = self._get_free_device(parent=parent_device)
 
         add_dialog = AddDialog(self.parent_window, parent_device, free_device,
-                               [("free", free_device)], [], True)  # with kickstart_mode=True
+                               [("free", free_device)], [], True)  # with installer_mode=True
 
         # swap -- mountpoint and label entries shouldn't be visible
         add_dialog.filesystems_combo.set_active_id("swap")
@@ -672,6 +672,9 @@ class AddDialogTest(unittest.TestCase):
 
         add_dialog = AddDialog(self.parent_window, parent_device, free_device,
                                [("free", free_device)], ["/root"], True)
+
+        # reset mock
+        self.error_dialog.reset_mock()
 
         # valid mountpoint
         add_dialog.mountpoint_entry.set_text("/home")
