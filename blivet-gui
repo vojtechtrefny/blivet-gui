@@ -96,18 +96,18 @@ def main():
         p = Popen("pkexec blivet-gui-daemon %d" % os.geteuid(), stdout=PIPE, shell=True, preexec_fn=daemon_preexec)
         output = p.stdout.readline()
 
-        # we expect exactly two parameters
-        if len(output.split()) != 2:
+        # we expect exactly one parameter
+        if len(output.split()) != 1:
             ErrorDialog(parent_window=None, msg=_("Failed to start blivet-gui-daemon."))
             sys.exit(1)
 
         else:
-            sockfile, secret = output.split()
-
             from blivetgui.blivetgui import BlivetGUI
             from blivetgui.communication.client import BlivetGUIClient
 
-            client = BlivetGUIClient(server_socket=sockfile, secret=secret)
+            sockfile = output.split()[0]
+
+            client = BlivetGUIClient(server_socket=sockfile)
             BlivetGUI(client)
 
             css_provider = Gtk.CssProvider()
