@@ -31,7 +31,7 @@ class BlivetGUIClientTest(unittest.TestCase):
 
     @patch("blivetgui.communication.client.BlivetGUIClient.__init__", lambda a, b, c, d: None)
     def test_convert_args(self):
-        client = BlivetGUIClient(MagicMock(), MagicMock())
+        client = BlivetGUIClient(MagicMock())
 
         # 'normal' arguments
         args = ["abcdef", 1, 1.01, True, None, Size("8 GiB")]

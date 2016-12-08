@@ -105,29 +105,26 @@ class BlivetUtilsServer(socketserver.BaseRequestHandler):  # pylint: disable=no-
 
             unpickled_msg = pickle.loads(msg)
 
-            if unpickled_msg[0] == self.server.secret:  # pylint: disable=no-member
-                raise RuntimeError("Request from unauthorized client.")
-
-            if unpickled_msg[1] == "quit":
+            if unpickled_msg[0] == "quit":
                 self.server.quit = True  # pylint: disable=no-member
                 break
 
-            elif unpickled_msg[1] == "init":
+            elif unpickled_msg[0] == "init":
                 self._blivet_utils_init(unpickled_msg)
 
-            elif unpickled_msg[1] == "call":
+            elif unpickled_msg[0] == "call":
                 self._call_utils_method(unpickled_msg)
 
-            elif unpickled_msg[1] == "param":
+            elif unpickled_msg[0] == "param":
                 self._get_param(unpickled_msg)
 
-            elif unpickled_msg[1] == "method":
+            elif unpickled_msg[0] == "method":
                 self._call_method(unpickled_msg)
 
-            elif unpickled_msg[1] == "next":
+            elif unpickled_msg[0] == "next":
                 self._get_next(unpickled_msg)
 
-            elif unpickled_msg[1] == "key":
+            elif unpickled_msg[0] == "key":
                 self._get_key(unpickled_msg)
 
     def _recv_msg(self):
@@ -205,8 +202,8 @@ class BlivetUtilsServer(socketserver.BaseRequestHandler):  # pylint: disable=no-
         """ Get param of a object
         """
 
-        proxy_object = self.object_dict[data[2].id]
-        param_name = data[3]
+        proxy_object = self.object_dict[data[1].id]
+        param_name = data[2]
 
         try:
             answer = getattr(proxy_object, param_name)
@@ -226,7 +223,7 @@ class BlivetUtilsServer(socketserver.BaseRequestHandler):  # pylint: disable=no-
         """ Get next member of iterable object
         """
 
-        proxy_object = self.object_dict[data[2].id]
+        proxy_object = self.object_dict[data[1].id]
 
         try:
             answer = proxy_object.__next__()
@@ -242,8 +239,8 @@ class BlivetUtilsServer(socketserver.BaseRequestHandler):  # pylint: disable=no-
         """ Get member of iterable object
         """
 
-        proxy_object = self.object_dict[data[2].id]
-        key = data[3]
+        proxy_object = self.object_dict[data[1].id]
+        key = data[2]
 
         answer = proxy_object[key]
         pickled_answer = self._pickle_answer(answer)
@@ -261,7 +258,7 @@ class BlivetUtilsServer(socketserver.BaseRequestHandler):  # pylint: disable=no-
             answer = ProxyDataContainer(success=False, reason="running")
 
         else:
-            args = self._args_convertTo_objects(data[2])
+            args = self._args_convertTo_objects(data[1])
 
             try:
                 self.blivet_utils = BlivetUtils(*args)
@@ -282,9 +279,9 @@ class BlivetUtilsServer(socketserver.BaseRequestHandler):  # pylint: disable=no-
         """ Call blivet method
         """
 
-        proxy_object = self.object_dict[data[2].id]
-        param_name = data[3]
-        args = data[4]
+        proxy_object = self.object_dict[data[1].id]
+        param_name = data[2]
+        args = data[3]
 
         method = getattr(proxy_object, param_name)
         answer = method(*args)
@@ -296,14 +293,14 @@ class BlivetUtilsServer(socketserver.BaseRequestHandler):  # pylint: disable=no-
         """ Call a method from BlivetUtils
         """
 
-        args = self._args_convertTo_objects(data[3])
+        args = self._args_convertTo_objects(data[2])
 
-        if data[2] == "blivet_do_it":
+        if data[1] == "blivet_do_it":
             answer = self.blivet_utils.blivet_do_it(self._progress_report_hook)
 
         else:
             try:
-                utils_method = getattr(self.blivet_utils, data[2])
+                utils_method = getattr(self.blivet_utils, data[1])
                 ret = utils_method(*args)
                 answer = ProxyDataContainer(success=True, answer=ret)
             except Exception as e:  # pylint: disable=broad-except

@@ -29,8 +29,6 @@ import sys
 import atexit
 import pid
 
-import random
-
 import tempfile
 
 import socketserver
@@ -46,7 +44,6 @@ class BlivetGUIServer(socketserver.UnixStreamServer):  # pylint: disable=no-init
 
     quit = False
     other_running = False
-    secret = None
 
     def serve_forever(self):  # pylint: disable=arguments-differ
         """ Serve until interrupted
@@ -93,7 +90,6 @@ def main(argv):
     sock_file = create_sock_file()
 
     server = BlivetGUIServer(sock_file, BlivetUtilsServer)
-    server.secret = random.getrandbits(32)
 
     user_id = int(argv[0])
     os.chown(sock_file, user_id, user_id)
@@ -107,7 +103,7 @@ def main(argv):
     else:
         atexit.register(remove_temp_files, (pidfile.filename,))
 
-    print(sock_file, str(server.secret))
+    print(sock_file)
     sys.stdout.flush()
 
     server.serve_forever()
