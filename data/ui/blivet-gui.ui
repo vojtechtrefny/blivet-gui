@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.19.0 -->
+<!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkAccelGroup" id="accelgroup"/>
@@ -245,6 +245,7 @@
           <object class="GtkPaned" id="paned">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="vexpand">True</property>
             <property name="position">220</property>
             <child>
               <object class="GtkScrolledWindow" id="disks_window">
@@ -565,6 +566,7 @@
                           <object class="GtkTreeView" id="treeview_logical">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="vexpand">True</property>
                             <property name="model">liststore_logical</property>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="treeview-selection2"/>
