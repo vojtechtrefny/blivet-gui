@@ -37,8 +37,11 @@ from .actions_toolbar import DeviceToolbar
 from .visualization.logical_view import LogicalView
 from .visualization.physical_view import PhysicalView
 from .blivet_utils import BlivetUtils
+from .dialogs import message_dialogs
 
 from .gui_utils import locate_ui_file
+
+from contextlib import contextmanager
 
 
 class BlivetUtilsAnaconda(BlivetUtils):
@@ -119,3 +122,26 @@ class BlivetGUIAnaconda(BlivetGUI):
     @property
     def main_window(self):
         return self.spoke.main_window
+
+    @contextmanager
+    def enlightbox(self):
+        self.main_window.lightbox_on()
+
+        yield
+
+        self.main_window.lightbox_off()
+
+    def show_error_dialog(self, error_message):
+        with self.enlightbox():
+            message_dialogs.ErrorDialog(self.main_window, error_message, decorated=False)
+
+    def show_warning_dialog(self, warning_message):
+        with self.enlightbox():
+            message_dialogs.WarningDialog(self.main_window, warning_message, decorated=False)
+
+    def show_confirmation_dialog(self, title, question):
+        with self.enlightbox():
+            dialog = message_dialogs.ConfirmDialog(self.main_window, title, question, decorated=False)
+            response = dialog.run()
+
+        return response
