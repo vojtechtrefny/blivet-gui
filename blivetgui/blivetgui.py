@@ -353,7 +353,7 @@ class BlivetGUI(object):
         allow, msg = self._allow_add_device(selected_device)
 
         if not allow:
-            message_dialogs.ErrorDialog(self.main_window, msg)
+            self.show_error_dialog(msg)
             return
 
         # uninitialized disk or mdarray -> add a disklabel
@@ -417,8 +417,7 @@ class BlivetGUI(object):
         title = _("Confirm delete operation")
         msg = _("Are you sure you want delete device {name}?").format(name=deleted_device.name)
 
-        dialog = message_dialogs.ConfirmDialog(self.main_window, title, msg)
-        response = dialog.run()
+        response = self.show_confirmation_dialog(title, msg)
 
         if response:
             result = self.client.remote_call("delete_device", deleted_device)
@@ -533,8 +532,7 @@ class BlivetGUI(object):
 
             if not ret:
                 msg = _("Device decryption failed. Are you sure provided password is correct?")
-                message_dialogs.ErrorDialog(self.main_window, msg)
-
+                self.show_error_dialog(msg)
                 return
 
         self.list_devices.update_devices_view()
