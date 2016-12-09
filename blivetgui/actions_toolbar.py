@@ -90,6 +90,8 @@ class ActionsToolbar(BlivetGUIToolbar):
     def __init__(self, blivet_gui):
         super(ActionsToolbar, self).__init__(blivet_gui)
 
+        self.toolbar = self.blivet_gui.builder.get_object("vbox_topbar")
+
         button_apply = self.blivet_gui.builder.get_object("button_apply")
         button_apply.connect("clicked", self.blivet_gui.apply_event)
         self.buttons["apply"] = button_apply

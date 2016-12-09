@@ -92,9 +92,13 @@ class BlivetGUI(object):
         # ActionsMenu
         self.popup_menu = ActionsMenu(self)
 
-        # ActionsToolbar
+        # DeviceToolbar
         self.device_toolbar = DeviceToolbar(self)
+
+        # ActionsToolbar
         self.actions_toolbar = ActionsToolbar(self)
+        vbox_right = self.builder.get_object("vbox_right")
+        vbox_right.pack_start(self.actions_toolbar.toolbar, expand=False, fill=True, padding=0)
 
         # ListDevices
         self.list_devices = ListDevices(self)
