@@ -40,13 +40,14 @@ class WarningDialog(object):
     """ Basic warning dialog
     """
 
-    def __init__(self, parent_window, msg):
+    def __init__(self, parent_window, msg, decorated=True):
 
         builder = Gtk.Builder()
         builder.set_translation_domain("blivet-gui")
         builder.add_from_file(locate_ui_file('warning_dialog.ui'))
         dialog = builder.get_object("warning_dialog")
 
+        dialog.set_decorated(decorated)
         dialog.set_transient_for(parent_window)
         dialog.format_secondary_text(msg)
 
@@ -59,13 +60,14 @@ class ErrorDialog(object):
     """ Basic error dialog
     """
 
-    def __init__(self, parent_window, msg):
+    def __init__(self, parent_window, msg, decorated=True):
 
         builder = Gtk.Builder()
         builder.set_translation_domain("blivet-gui")
         builder.add_from_file(locate_ui_file('error_dialog.ui'))
         dialog = builder.get_object("error_dialog")
 
+        dialog.set_decorated(decorated)
         dialog.set_transient_for(parent_window)
         dialog.format_secondary_text(msg)
 
@@ -78,13 +80,14 @@ class InfoDialog(object):
     """ Basic error dialog
     """
 
-    def __init__(self, parent_window, msg):
+    def __init__(self, parent_window, msg, decorated=True):
 
         builder = Gtk.Builder()
         builder.set_translation_domain("blivet-gui")
         builder.add_from_file(locate_ui_file('info_dialog.ui'))
         dialog = builder.get_object("info_dialog")
 
+        dialog.set_decorated(decorated)
         dialog.set_transient_for(parent_window)
         dialog.format_secondary_text(msg)
 
@@ -151,13 +154,14 @@ class ConfirmDialog(object):
     """ General confirmation dialog
     """
 
-    def __init__(self, parent_window, title, msg):
+    def __init__(self, parent_window, title, msg, decorated=True):
 
         builder = Gtk.Builder()
         builder.set_translation_domain("blivet-gui")
         builder.add_from_file(locate_ui_file('confirm_dialog.ui'))
         self.dialog = builder.get_object("confirm_dialog")
 
+        self.dialog.set_decorated(decorated)
         self.dialog.set_transient_for(parent_window)
         self.dialog.set_markup("<b>" + title + "</b>")
         self.dialog.format_secondary_text(msg)
