@@ -145,3 +145,9 @@ class BlivetGUIAnaconda(BlivetGUI):
             response = dialog.run()
 
         return response
+
+    def run_dialog(self, dialog):
+        with self.enlightbox():
+            response = dialog.run()
+
+        return response
