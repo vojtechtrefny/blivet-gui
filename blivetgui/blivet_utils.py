@@ -754,6 +754,8 @@ class BlivetUtils(object):
                 fmt_options = ""
 
             new_fmt = blivet.formats.get_format(fmt_type=user_input.filesystem,
+                                                label=user_input.label,
+                                                mountpoint=user_input.mountpoint,
                                                 create_options=fmt_options)
             return [blivet.deviceaction.ActionCreateFormat(device, new_fmt)]
 
