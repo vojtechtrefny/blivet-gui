@@ -434,6 +434,10 @@ class AddDialog(Gtk.Dialog):
 
         self.set_transient_for(self.parent_window)
 
+        if self.installer_mode:
+            self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+            self.set_decorated(False)
+
         self.set_resizable(False)  # auto shrink after removing widgets
 
         self.grid = Gtk.Grid(column_homogeneous=False, row_spacing=10, column_spacing=5)
