@@ -46,16 +46,27 @@ from contextlib import contextmanager
 
 class BlivetUtilsAnaconda(BlivetUtils):
 
-    def __init__(self, storage):
+    def __init__(self):
         # pylint: disable=super-init-not-called
 
-        self.storage = storage
+        self._storage = None
+
+    @property
+    def storage(self):
+        return self._storage
+
+    @storage.setter
+    def storage(self, storage):
+        self._storage = storage
 
 
 class BlivetGUIAnacondaClient(object):
 
-    def __init__(self, storage):
-        self.utils = BlivetUtilsAnaconda(storage)
+    def __init__(self):
+        self.utils = BlivetUtilsAnaconda()
+
+    def initialize(self, storage):
+        self.utils.storage = storage
 
     def remote_call(self, method, *args):
 
@@ -110,11 +121,6 @@ class BlivetGUIAnaconda(BlivetGUI):
 
         self.physical_view = PhysicalView(self)
         self.builder.get_object("scrolledwindow_physical").add(self.physical_view.vbox)
-
-        # select first device in ListDevice
-        self.list_devices.disks_view.set_cursor(1)
-        self.main_window.show_all()
-        self.list_devices.disks_view.set_cursor(0)
 
     def activate_action_buttons(self, activate):
         pass  # there are no action buttons in installer gui
