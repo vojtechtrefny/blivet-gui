@@ -27,8 +27,6 @@ gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
 
-import sys
-
 from .i18n import _
 
 # ---------------------------------------------------------------------------- #
@@ -48,25 +46,20 @@ class ListDevices(object):
 
         self.blivet_gui = blivet_gui
 
-        # last selected device from list
-        self.last_iter = None
-
-        # currently selected device
-        self.selected_device = None
+        self.last_iter = None  # last selected device from list
+        self.selected_device = None  # currently selected device
 
         self.device_list = self.blivet_gui.builder.get_object("liststore_devices")
-        num_devices = self.load_devices()
-
-        if not num_devices:
-            msg = _("blivet-gui failed to find at least one storage device to work with."
-                    "\n\nPlease connect a storage device to your computer and re-run blivet-gui.")
-            self.blivet_gui.show_error_dialog(msg)
-            sys.exit(0)
-
         self.disks_view = self.blivet_gui.builder.get_object("treeview_devices")
 
         selection = self.disks_view.get_selection()
         self.selection_signal = selection.connect("changed", self.on_disk_selection_changed)
+
+    def load_devices(self):
+        self.device_list.clear()
+
+        self.load_disks()
+        self.load_group_devices()
 
     def load_disks(self):
         """ Load disks
@@ -88,8 +81,6 @@ class ListDevices(object):
             else:
                 self.device_list.append([disk, icon_disk, str(disk.name + "\n<i><small>" +
                                                               str(disk.model) + "</small></i>")])
-
-        return len(disks)
 
     def load_group_devices(self):
         """ Load LVM2 VGs, Btrfs Volumes and MDArrays
@@ -115,20 +106,6 @@ class ListDevices(object):
             for device in gdevices["btrfs"]:
                 self.device_list.append([device, icon_group, str(device.name + "\n<i><small>Btrfs Volume</small></i>")])
 
-        return (len(gdevices["lvm"]) + len(gdevices["raid"]) + len(gdevices["btrfs"]))
-
-    def load_devices(self):
-        """ Load all devices
-        """
-        self.device_list.clear()
-
-        devices = 0
-
-        devices += self.load_disks()
-        devices += self.load_group_devices()
-
-        return devices
-
     def update_devices_view(self):
         """ Update device view
         """
@@ -148,17 +125,11 @@ class ListDevices(object):
         selection.handler_unblock(self.selection_signal)
 
         # if the device still exists, select it; else select first device in list
-        i = 0
-        selected = False
-
-        for device in self.device_list:
+        for idx, device in enumerate(self.device_list):
             if device[0] and device[0].name == selected_device:
-                self.disks_view.set_cursor(i)
-                selected = True
-
-            i += 1
-
-        if not selected:
+                self.disks_view.set_cursor(idx)
+                break
+        else:
             self.disks_view.set_cursor(1)
 
     def select_device_by_name(self, device_name):

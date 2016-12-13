@@ -121,13 +121,19 @@ class BlivetGUI(object):
         self.physical_view = PhysicalView(self)
         self.builder.get_object("scrolledwindow_physical").add(self.physical_view.vbox)
 
+        # allow ignoring exceptions
+        self.exc.allow_ignore = True
+
+        self.initialize()
+
+    def initialize(self):
+        self.list_devices.load_devices()
+        self.list_actions.initialize()
+
         # select first device in ListDevice
         self.list_devices.disks_view.set_cursor(1)
         self.main_window.show_all()
         self.list_devices.disks_view.set_cursor(0)
-
-        # allow ignoring exceptions
-        self.exc.allow_ignore = True
 
     def _set_physical_view_visible(self, visible):
         notebook = self.builder.get_object("notebook_views")
