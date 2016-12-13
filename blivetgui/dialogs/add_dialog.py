@@ -372,11 +372,13 @@ class AdvancedOptions(object):
                 chunk_size = size.Size(self.chunk_combo.get_active_text())
             except ValueError:
                 msg = _("'{0}' is not a valid chunk size specification.").format(self.chunk_combo.get_active_text())
-                message_dialogs.ErrorDialog(self.add_dialog, msg)
+                message_dialogs.ErrorDialog(self.add_dialog, msg,
+                                            not self.add_dialog.installer_mode)  # do not show decoration in installer mode
                 return False
             if chunk_size % size.Size("4 KiB") != size.Size(0):
                 msg = _("Chunk size must be multiple of 4 KiB.")
-                message_dialogs.ErrorDialog(self.add_dialog, msg)
+                message_dialogs.ErrorDialog(self.add_dialog, msg,
+                                            not self.add_dialog.installer_mode)  # do not show decoration in installer mode
                 return False
 
         return True
@@ -1111,41 +1113,47 @@ class AddDialog(Gtk.Dialog):
 
         if user_input.encrypt and not user_input.passphrase:
             msg = _("Passphrase not specified.")
-            message_dialogs.ErrorDialog(self, msg)
-
+            message_dialogs.ErrorDialog(self, msg,
+                                        not self.installer_mode)  # message_dialogsmessage_dialogs
             return False
 
         if user_input.mountpoint and not os.path.isabs(user_input.mountpoint):
             msg = _("\"{0}\" is not a valid mountpoint.").format(user_input.mountpoint)
-            message_dialogs.ErrorDialog(self, msg)
+            message_dialogs.ErrorDialog(self, msg,
+                                        not self.installer_mode)  # message_dialogsmessage_dialogs
 
             return False
 
         if user_input.device_type == "mdraid" and len(user_input.parents) == 1:
             msg = _("Please select at least two parent devices.")
-            message_dialogs.ErrorDialog(self, msg)
+            message_dialogs.ErrorDialog(self, msg,
+                                        not self.installer_mode)  # message_dialogsmessage_dialogs
 
             return False
 
         if self.installer_mode and user_input.mountpoint:
             valid, msg = is_mountpoint_valid(self.mountpoints, user_input.mountpoint)
             if not valid:
-                message_dialogs.ErrorDialog(self, msg)
+                message_dialogs.ErrorDialog(self, msg,
+                                            not self.installer_mode)  # message_dialogsmessage_dialogs
                 return False
 
         if user_input.name and not is_name_valid(user_input.device_type, user_input.name):
             msg = _("\"{0}\" is not a valid name.").format(user_input.name)
-            message_dialogs.ErrorDialog(self, msg)
+            message_dialogs.ErrorDialog(self, msg,
+                                        not self.installer_mode)  # message_dialogsmessage_dialogs
             return False
 
         if user_input.label and not is_label_valid(user_input.filesystem, user_input.label):
             msg = _("\"{0}\" is not a valid label.").format(user_input.label)
-            message_dialogs.ErrorDialog(self, msg)
+            message_dialogs.ErrorDialog(self, msg,
+                                        not self.installer_mode)  # message_dialogsmessage_dialogs
             return False
 
         if self.pass_entry.get_text() != self.pass2_entry.get_text():
             msg = _("Provided passphrases do not match.")
-            message_dialogs.ErrorDialog(self, msg)
+            message_dialogs.ErrorDialog(self, msg,
+                                        not self.installer_mode)  # message_dialogsmessage_dialogs
             return False
 
         return True
