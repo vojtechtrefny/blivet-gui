@@ -379,10 +379,16 @@ class BlivetGUI(object):
             selected_parent = selected_device
             selected_free = selected_device
 
+        if self.installer_mode:
+            mountpoints = self.client.remote_call("get_mountpoints")
+        else:
+            mountpoints = []
+
         dialog = add_dialog.AddDialog(parent_window=self.main_window,
                                       selected_parent=selected_parent,
                                       selected_free=selected_free,
                                       available_free=self.client.remote_call("get_free_info"),
+                                      mountpoints=mountpoints,
                                       installer_mode=self.installer_mode)
 
         response = self.run_dialog(dialog)
