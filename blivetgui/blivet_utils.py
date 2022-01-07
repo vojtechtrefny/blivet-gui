@@ -1431,7 +1431,7 @@ class BlivetUtils(object):
 
     def get_system_mountpoints(self, blivet_device):
         return blivet.mounts.mounts_cache.get_mountpoints(blivet_device.path,
-                                                          getattr(self, "subvolspec", None))
+                                                          getattr(blivet_device.format, "subvolspec", None))
 
     def create_disk_label(self, blivet_device, label_type):
         """ Create disklabel
