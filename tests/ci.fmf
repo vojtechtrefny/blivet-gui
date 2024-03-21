@@ -11,8 +11,4 @@ prepare:
     how: ansible
     playbook: misc/install-test-dependencies.yml
 
-discover:
-    how: fmf
-
-execute:
-    how: tmt
+test: python3 run_tests.py
