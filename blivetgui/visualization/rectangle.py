@@ -35,7 +35,7 @@ import blivet
 class Rectangle(Gtk.RadioButton):
     """ Rectangle object """
 
-    def __init__(self, rtype, group, width, height, device, blivet_gui, label=True):
+    def __init__(self, rtype, group, width, height, device, blivet_gui, label=True, parent_size=None):
         self.width = width
         self.height = height
 
@@ -65,6 +65,12 @@ class Rectangle(Gtk.RadioButton):
         if self.device.size == blivet.size.Size(0):
             # TRANSLATORS: size value for device with invalid/unknown size
             devsize = _("unknown")
+        elif parent_size is not None and self.device.size > parent_size:
+            # TRANSLATORS: size label for a device spanning multiple parents
+            # (e.g. RAID), showing per-parent contribution and total size
+            devsize = _("{parent_size} of {total_size}").format(
+                parent_size=str(parent_size),
+                total_size=str(self.device.size))
         else:
             devsize = str(self.device.size)
 

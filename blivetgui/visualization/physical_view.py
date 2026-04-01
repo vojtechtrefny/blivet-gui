@@ -59,11 +59,13 @@ class PhysicalView:
             # lower level of the tree -> visualization of children
             if depth:
                 (device, is_valid) = self._devices_list[treeiter]
+                parent_iter = self._devices_list.iter_parent(treeiter)
+                parent_size = self._devices_list[parent_iter][0].size
 
                 if is_valid:
-                    rect = self._new_rectangle(device, "child-valid-" + self._get_child_position(treeiter), width=rect_widths[device])
+                    rect = self._new_rectangle(device, "child-valid-" + self._get_child_position(treeiter), width=rect_widths[device], parent_size=parent_size)
                 else:
-                    rect = self._new_rectangle(device, "child-invalid-" + self._get_child_position(treeiter), width=rect_widths[device])
+                    rect = self._new_rectangle(device, "child-invalid-" + self._get_child_position(treeiter), width=rect_widths[device], parent_size=parent_size)
                 box.pack_start(child=rect, expand=True, fill=True, padding=0)
 
             else:
@@ -195,11 +197,11 @@ class PhysicalView:
             box.destroy()
         self.boxes = []
 
-    def _new_rectangle(self, device, rtype="", width=90, height=90):
+    def _new_rectangle(self, device, rtype="", width=90, height=90, parent_size=None):
         # no labels for 'invalid rectangles' in physical view
         label = not rtype.startswith("child-invalid-")
 
-        rect = Rectangle(rtype, None, width, height, device, self.blivet_gui, label)
+        rect = Rectangle(rtype, None, width, height, device, self.blivet_gui, label, parent_size=parent_size)
         rect.connect("button-press-event", self._on_button_press)
         self.rectangles.append(rect)
 
