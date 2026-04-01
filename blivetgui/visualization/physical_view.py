@@ -113,12 +113,15 @@ class PhysicalView:
         if allocated_width >= view_width:
             return width_dict
 
-        # allocate remaining space
-        self._allocate_remaining_space(self._devices_list.iter_children(parent_iter), view_width, allocated_width, width_dict)
+        # allocate remaining space based on device sizes, capping at the
+        # parent size so that multi-parent devices (e.g. RAID) don't get
+        # more width than their parent
+        parent_size = self._devices_list[parent_iter][0].size.convert_to()
+        self._allocate_remaining_space(self._devices_list.iter_children(parent_iter), view_width, allocated_width, width_dict, parent_size)
 
         return width_dict
 
-    def _allocate_remaining_space(self, treeiter, available_width, allocated_width, width_dict):
+    def _allocate_remaining_space(self, treeiter, available_width, allocated_width, width_dict, parent_size=None):
         """ Allocate remaining space (px) for devices based on its size
 
             :param treeiter: first iter on given level (or None for first iter)
@@ -129,10 +132,13 @@ class PhysicalView:
             :type allocated_width: int
             :param width_dict: dict with devices and currently allocated with
             :type width_dict: dict
+            :param parent_size: size of the parent device in bytes; child sizes
+                                are capped at this value for width calculation
+            :type parent_size: int or None
 
         """
 
-        total_size = self._get_total_device_size(treeiter)
+        total_size = self._get_total_device_size(treeiter, parent_size)
         if total_size == 0:
             return
 
@@ -142,7 +148,10 @@ class PhysicalView:
 
         while treeiter:
             device = self._devices_list[treeiter][0]
-            extra_space = int(remaining_space * (device.size.convert_to() / total_size))
+            device_size = device.size.convert_to()
+            if parent_size is not None:
+                device_size = min(device_size, parent_size)
+            extra_space = int(remaining_space * (device_size / total_size))
             width_dict[device] += extra_space
             allocated_width += extra_space
 
@@ -154,17 +163,23 @@ class PhysicalView:
             if width_dict:  # empty dict
                 width_dict[list(width_dict.keys())[0]] += (allocated_width - available_width)
 
-    def _get_total_device_size(self, treeiter):
+    def _get_total_device_size(self, treeiter, parent_size=None):
         """ Return size (in bytes) of all devices on current level
 
             :param treeiter: first iter on given level
             :type treeiter: Gtk.TreeIter
+            :param parent_size: size of the parent device in bytes; child sizes
+                                are capped at this value
+            :type parent_size: int or None
 
         """
 
         total_size = 0
         while treeiter:
-            total_size += self._devices_list[treeiter][0].size.convert_to()
+            device_size = self._devices_list[treeiter][0].size.convert_to()
+            if parent_size is not None:
+                device_size = min(device_size, parent_size)
+            total_size += device_size
             treeiter = self._devices_list.iter_next(treeiter)
 
         return total_size
