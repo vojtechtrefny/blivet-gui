@@ -6,6 +6,8 @@ RELEASE_TAG=$(VERSION)
 
 PYTHON=python3
 
+ANSIBLE_BECOME_FLAG := $(shell [ "$$(id -u)" -eq 0 ] && echo "" || echo "-K")
+
 all:
 	$(MAKE) -C po
 
@@ -15,7 +17,7 @@ potfile:
 install-requires:
 	@echo "*** Installing the dependencies required for testing and analysis ***"
 	@which ansible-playbook >/dev/null 2>&1 || ( echo "Please install Ansible to install testing dependencies"; exit 1 )
-	@ansible-playbook -K -i "localhost," -c local misc/install-test-dependencies.yml
+	@ansible-playbook $(ANSIBLE_BECOME_FLAG) -i "localhost," -c local misc/install-test-dependencies.yml
 
 test:
 	@echo "*** Running unittests ***"
